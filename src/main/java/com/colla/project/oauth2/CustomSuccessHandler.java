@@ -1,7 +1,9 @@
 package com.colla.project.oauth2;
 
 import com.colla.project.dto.CustomOAuth2User;
+import com.colla.project.entity.SocialUser;
 import com.colla.project.jwt.JWTUtil;
+import com.colla.project.repository.SocialUserRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,6 +24,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler{
 
     private final JWTUtil jwtUtil;
 
+    private final SocialUserRepository socialUserRepository;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
@@ -34,19 +38,22 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler{
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
-        String token = jwtUtil.createJwt("access",username,role,60*60*60L);
+        String token = jwtUtil.createJwt("access",username,role,86400000L);
+
+        SocialUser user = socialUserRepository.findByUsername(username);
 
         response.addCookie(createCookie("Authorization", token));
-        response.sendRedirect("http://localhost:3000/");
+        response.addCookie(createCookie("username", user.getName()));
+        response.sendRedirect("http://localhost:3000");
     }
 
     private Cookie createCookie(String key, String value) {
 
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(60*60*60);
-        //cookie.setSecure(true);
+        cookie.setSecure(true);
         cookie.setPath("/");
-        cookie.setHttpOnly(true);
+        cookie.setHttpOnly(false);
 
         return cookie;
     }

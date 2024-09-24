@@ -92,6 +92,23 @@ function App() {
     useEffect(() => {
         // 어떤 상황에서 내가 실행시키고 싶은거
         getUserLocation();
+
+        // 혹시나 소셜로그인을 통해 cookie에 token이 있을 수 있기 때문에
+        // HttpOnly가 설정되지 않은 쿠키에서 토큰을 가져오기
+        const token = document.cookie
+            .split('; ')
+            .find((row) => row.startsWith('Authorization='))
+            ?.split('=')[1];
+
+        const username = document.cookie
+            .split('; ')
+            .find((row) => row.startsWith('username='))
+            ?.split('=')[1];
+
+        if(token && username) {
+            localStorage.setItem('accessToken', token);
+            localStorage.setItem('username', username);
+        }
     }, []);
     ///////////////////////////////////////////////////////////////////////////////
 
@@ -308,9 +325,14 @@ function App() {
             }
         })
             .then(() => {
+                console.log('로그아웃 로직은 성공')
                 // 백에서 로그아웃 로직이 성공했을 때 스토리지에 있는 token과 username을 삭제
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('username');
+
+                // 쿠키에 있는 token & username 삭제
+                document.cookie = 'Authorization=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+                document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
                 // 로그아웃에 성공하면 기본페이지로 이동
                 window.location.href = '/';
             })

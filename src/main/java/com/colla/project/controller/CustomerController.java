@@ -3,6 +3,7 @@ package com.colla.project.controller;
 import com.colla.project.dto.CustomUserDetails;
 import com.colla.project.dto.JoinDTO;
 import com.colla.project.service.CustomerService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
